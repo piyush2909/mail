@@ -9,7 +9,7 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>
 <style>
 ul {
-  padding:0px;
+	padding:0px;
 	margin: 0px;
 }
 #response {
@@ -89,8 +89,13 @@ $(document).ready(function(){
 </script>
 </head>
 <?php if(isset($_POST['mailsubmit'])){
-		$query="insert into  dragdrop (maildescription,productname,discount) values('".$_POST['maildesc']."','".$_POST['productname']."','".$_POST['discount']."')";
+	   $maxquery="SELECT MAX(listorder) as max FROM dragdrop";
+		$maxval=mysql_query($maxquery) or die(mysql_error()); 
+		$maxrowval=mysql_fetch_array($maxval);
+		$max=$maxrowval[max]+1;
+		$query="insert into  dragdrop (maildescription,productname,discount,listorder) values('".$_POST['maildesc']."','".$_POST['productname']."','".$_POST['discount']."',$max)";
 		mysql_query($query) or die('Error, insert query failed');
+		header('index.php?action=list');
 	}?>
    <?php 
    if(isset($_GET['delete']) || $_GET['delete']!=''){
@@ -103,10 +108,11 @@ $(document).ready(function(){
 <div id="container">
  
 <?php if($_GET['action']=="add" || $_GET['edit']!=''){
- $query="select * from  dragdrop  where id=".$_GET['edit'];
+	if($_GET['edit']!=''){
+$query="select * from  dragdrop  where id=".$_GET['edit'];
 $result = mysql_query($query) or die(mysql_error());
-			 $row = mysql_fetch_array($result);
-
+$row = mysql_fetch_array($result);
+		}
 		?>
 <form name="mailcron" id="mailcron" method="post" action=""/>
 <div class="mailclss">
@@ -142,13 +148,14 @@ $result = mysql_query($query) or die(mysql_error());
 				$result = mysql_query($query);
 				while($row = mysql_fetch_array($result, MYSQL_ASSOC))
 				{
-				$id = stripslashes($row['id']);
+				$id=stripslashes($row['id']);	
+				$id1 = stripslashes($row['listorder']);
 				$productname = stripslashes($row['productname']);
 				$discount = stripslashes($row['discount']);
 				$text = stripslashes($row['maildescription']);
 				?>
       <li id="arrayorder_<?php echo $id ?>">
-	 	<div class="idcolre"><?php echo $id ?></div>
+	 	<div class="idcolre"><?php echo $id1 ?></div>
        <div class="prodclr"><?php echo $productname ?> </div>
 	  <div class="disclor"> <?php echo $discount?>  </div>
       <div class="txtclor"> <?php echo $text; ?>  </div>
